@@ -1,0 +1,52 @@
+const fsHtml = require('fs'); // обычный fs для HTML
+const path = require('path');
+function generateMapHtml() {
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Маршрут по Германии</title>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+    .leaflet-popup-content-wrapper { font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([51.1657, 10.4515], 6);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    fetch('route.geojson')
+      .then(res => res.json())
+      .then(routeData => {
+        L.geoJSON(routeData, { color: 'blue' }).addTo(map);
+
+        fetch('cities.json')
+          .then(res => res.json())
+          .then(cities => {
+            const routeCoords = routeData.geometry.coordinates;
+
+            routeCoords.forEach(([lon, lat], i) => {
+              const city = cities.find(c =>
+                Math.abs(c.lat - lat) < 0.01 && Math.abs(c.lon - lon) < 0.01
+              );
+              const name = city ? city.name : \`Точка \${i + 1}\`;
+              const marker = L.marker([lat, lon]).addTo(map);
+              marker.bindPopup(\`<b>\${i + 1}. \${name}</b>\`);
+            });
+          });
+      });
+  </script>
+</body>
+</html>
+  `.trim();
+
+    fsHtml.writeFileSync(path.join(__dirname, 'map.html'), html, 'utf-8');
+    console.log('Файл map.html создан.');
+}
+
+module.exports = generateMapHtml;
