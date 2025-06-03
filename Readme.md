@@ -58,9 +58,11 @@ ORS_API_KEY=ваш_ключ
 #### Запуск маршрута
 
 ```bash
-npm run start "startCity" "City1,City2,City3"
+npm run start "StartCity" "City1,City2,City3"
 ```
+"StartCity" - начальный город(по умолчанию Берлин)
 
+"City1,City2,City3" - ручная коректировка маршрутов
 **Пример:**
 
 ```bash
